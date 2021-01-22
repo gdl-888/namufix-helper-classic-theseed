@@ -79,7 +79,12 @@ function usrlnk() {
 	});
 }
 
-if(location.pathname.startsWith('/thread/')) setInterval(usrlnk, 1000); usrlnk();
+if(location.pathname.startsWith('/thread/')) {
+	setInterval(usrlnk, 1000);
+	qs('input#noDisplayHideAuthor').click();
+	qs('input#noDisplayHideAuthor').remove();
+	qs('label[for="noDisplayHideAuthor"]').remove();
+} usrlnk();
 
 (function() {
 	/* 참고 사이트
