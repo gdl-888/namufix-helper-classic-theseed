@@ -82,6 +82,35 @@ function usrlnk() {
 	});
 }
 
+/*
+ * 문서: 문서 / 수정자 / 수정 시간
+ * 토론: 항목 / 수정자 / 수정 시간
+ */
+if(location.pathname.startsWith('/contribution/')) {
+	const regex = location.pathname.match(/^\/contribution\/(author|ip)\/(.*)\/(document|discuss)$/);
+	const user  = _title.innerText.match(/^["](.*)["] 기여 목록$/)[1];
+	qs('table.table > colgroup').outerHTML = '<colgroup><col /><col style="width: 20%;" /><col style="width: 20%;" /></colgroup>';
+	
+	if(regex[3] == 'discuss') {
+		qs('table.table > thead > tr').outerHTML = '<tr><th>항목</th><th>수정자</th><th>수정 시간</th></tr>';
+	} else {
+		qs('table.table > thead > tr').outerHTML = '<tr><th>문서</th><th>수정자</th><th>수정 시간</th></tr>';
+	}
+	
+	qa('table.table > tbody > tr', tr => {
+		if(tr.querySelectorAll('td').length == 1) return;
+		const ftd = qs('td:first-child', tr);
+		var utd = '<td>';
+		if(regex[1] == 'author') {
+			utd += '<a style="font-weight: 700;" href="/w/사용자:' + encodeURIComponent(user) + '">' + user + '</a>';
+		} else {
+			utd += '<a href="/contribution/ip/' + encodeURIComponent(user) + '/document">' + user + '</a>';
+		}
+		utd += '</td>';
+		ftd.outerHTML = ftd.outerHTML + utd;
+	});
+}
+
 if(location.pathname.startsWith('/thread/')) {
 	setInterval(usrlnk, 1000);
 	qs('input#noDisplayHideAuthor').click();
@@ -106,7 +135,7 @@ try {
 	qs("div.w").outerHTML = qs('div.w').outerHTML;
 } catch(e){}
 
-if(location.pathname.startsWith('/edit/'))
+if(location.pathname.startsWith('/edit/') || location.pathname.startsWith('/new_edit_request/'))
 {
 	document.querySelector('form[method="post"]').setAttribute('id', 'editForm');
 	document.querySelector('form[method="post"] ul').setAttribute('class', 'nav nav-tabs');
