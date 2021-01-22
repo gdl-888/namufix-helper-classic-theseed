@@ -32,8 +32,7 @@ for(table of document.querySelectorAll('table')) {
 						}
 					}
 				}
-			} else 
-			  table.setAttribute('class', 'table');
+			} else table.setAttribute('class', 'table');
 		}
 	}
 }
@@ -46,14 +45,10 @@ if(location.pathname.startsWith('/Recent') || location.pathname.startsWith('/con
 				ol.removeAttribute(attr.name);
 				ol.setAttribute('class', 'breadcrumb link-nav');
 				for(li of ol.querySelectorAll('li')) {
-					for(attr of table.attributes) {
-						if(attr.name.startsWith('data-v-')) {
-							for(li of ol.querySelectorAll('li')) {
-               for(attr of li.attributes) {
-									if(attr.name.startsWith('data-v-')) {
-										li.removeAttribute(attr.name);
-									}
-								}
+					for(li of ol.querySelectorAll('li')) {
+						for(attr of li.attributes) {
+							if(attr.name.startsWith('data-v-')) {
+								li.removeAttribute(attr.name);
 							}
 						}
 					}
