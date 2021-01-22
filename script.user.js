@@ -98,7 +98,9 @@ if(location.pathname.startsWith('/contribution/')) {
 	}
 	
 	qa('table.table > tbody > tr', tr => {
-		if(tr.querySelectorAll('td').length == 1) return;
+		if(tr.querySelectorAll('td').length == 1) {
+			return qs('td', tr).setAttribute('colspan', '3');
+		}
 		const ftd = qs('td:first-child', tr);
 		var utd = '<td>';
 		if(regex[1] == 'author') {
