@@ -17,7 +17,10 @@ document.body.insertBefore(jq, document.getElementById('app'));
 var _title = document.querySelector('h1.title, .title h1');
 var _content = document.querySelector('.wiki-article');
 var _err = document.querySelector('.wiki-article > div');
+var ot = _title.innerText;
 if(_title.innerText == '오류' && !location.pathname.startsWith('/w/')) _title.innerText = '문제가 발생했습니다!', document.title = document.title.replace('오류', '문제가 발생했습니다!'), _err.outerHTML = '<h2>' + _err.innerHTML + '</h2>';
+if(location.pathname.startsWith('/history')) _title.innerText = _title.innerText.replace(/\s[(]역사[)]$/, '의 역사'), document.title = document.title.replace(ot, ot.replace(/\s[(]역사[)]$/, '의 역사'));
+if(location.pathname.startsWith('/backlink')) _title.innerText = _title.innerText.replace(/\s[(]역링크[)]$/, '의 역링크'), document.title = document.title.replace(ot, ot.replace(/\s[(]역링크[)]$/, '의 역링크'));
 
 for(table of document.querySelectorAll('table')) {
 	for(attr of table.attributes) {
