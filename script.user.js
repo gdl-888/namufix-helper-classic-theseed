@@ -101,28 +101,19 @@ for(el of document.getElementsByTagName('a'))
 	el.outerHTML = el.outerHTML;
 }
 
-/* 나무픽스 호환 */
+try {
+	/* 위키 본문에서 클릭 이벤트 리스너 제거. a 태그에서 제거하는 것이 아니다 */
+	qs("div.w").outerHTML = qs('div.w').outerHTML;
+} catch(e){}
+
 if(location.pathname.startsWith('/edit/'))
 {
 	document.querySelector('form[method="post"]').setAttribute('id', 'editForm');
 	document.querySelector('form[method="post"] ul').setAttribute('class', 'nav nav-tabs');
 }
 
-try {
-	/* 위키 본문에서 클릭 이벤트 리스너 제거. a 태그에서 제거하는 것이 아니다 */
-	qs("div.w").outerHTML = qs('div.w').outerHTML;
-} catch(e){}
-
-try {
-	/* form 태그 제출 이벤트 리스너 제거 */
-	for(el of document.querySelectorAll('form'))
-	{
-		el.outerHTML = el.outerHTML;
-	}
-} catch(e){}
-
 /* 검색 시 흰수평선 안나오게 */
-qs('form.form-inline#searchform').setAttribute('action', '/Go');
+try { qs('form.form-inline#searchform').setAttribute('action', '/Go'); } catch(e) { }
 
 /* 제출 단추에서 이벤트 리스너 제거 */
 for(el of document.querySelectorAll('form button'))
@@ -199,6 +190,14 @@ var si = setInterval(function() {
 			$(".wiki-heading").click(function() {
 				$(this).next().toggle();
 			});
+			
+			try {
+					/* form 태그 제출 이벤트 리스너 제거 */
+					for(el of document.querySelectorAll('form'))
+					{
+						$(el).parent()[0].replaceChild(el.cloneNode(1), el);
+					}
+			} catch(e){}
 		});
 	}
 }, 500);
