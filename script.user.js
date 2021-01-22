@@ -14,6 +14,12 @@ var jq = document.createElement('script');
 jq.setAttribute('src', 'https://theseed.io/js/jquery-2.1.4.min.js');  /* jQuery를 활성화한다. */
 document.body.insertBefore(jq, document.getElementById('app'));
 
+var ts = document.createElement('script');
+ts.setAttribute('src', 'https://theseed.io/js/theseed.js');
+document.body.insertBefore(ts, document.getElementById('app'));
+
+var config = JSON.parse(document.querySelector('div#app + script').innerText.replace('window.INITIAL_STATE=', '').replace(/[;]$/, ''));
+
 var _title = document.querySelector('h1.title, .title h1');
 var _content = document.querySelector('.wiki-article');
 var _err = document.querySelector('.wiki-article > div');
@@ -71,15 +77,100 @@ const qs = (q, e) => (e || document).querySelector(q);
 
 function usrlnk() {
 	qa('div.v-popover', vp => {
-		var ip = qs('a', vp);
-		var mbr = qs('a.u', vp);
+		try {
+			var ip = qs('a', vp);
+			var mbr = qs('a.u', vp);
 
-		if(mbr || (!ip.innerText.includes(':') && !ip.innerText.includes('.'))) {
-			vp.outerHTML = '<a ' + (mbr && location.pathname.startsWith('/thread/') ? 'style="font-weight: bold;"' : (mbr && !location.pathname.startsWith('/thread/') ? 'style="font-weight: bold;"' : '')) + ' href="/w/사용자:' + encodeURIComponent((mbr || ip).innerText) + '">' + (mbr || ip).innerHTML + '</a>';
-		} else {
-			vp.outerHTML = '<a href="/contribution/ip/' + encodeURIComponent(ip.innerText) + '/document">' + ip.innerHTML + '</a>';
+			if(mbr || (!ip.innerText.includes(':') && !ip.innerText.includes('.'))) {
+				vp.outerHTML = '<a ' + (mbr && location.pathname.startsWith('/thread/') ? 'style="font-weight: bold;"' : (mbr && !location.pathname.startsWith('/thread/') ? 'style="font-weight: bold;"' : '')) + ' href="/w/사용자:' + encodeURIComponent((mbr || ip).innerText) + '">' + (mbr || ip).innerHTML + '</a>';
+			} else {
+				vp.outerHTML = '<a href="/contribution/ip/' + encodeURIComponent(ip.innerText) + '/document">' + ip.innerHTML + '</a>';
+			}
+		} catch(e) { 
 		}
 	});
+}
+
+function req(pth) {
+	var request = new XMLHttpRequest();
+	request.open('GET', pth, 0);
+	request.send(null);
+
+	var doc = new DOMParser().parseFromString(request.responseText, "text/html");
+	return doc;
+}
+
+if(location.pathname == '/Upload') {
+	qs('input + input + input#fileInput + div.g').outerHTML = `
+		<div class=row>
+			<div class="form-group col-xs-12 col-md-7">
+				<label for=fakeFileInput>파일 선택</label>
+				<div class=input-group>
+					<input class=form-control id=fakeFileInput readonly type=text />
+					<span class=input-group-btn>
+					<button class="btn btn-secondary" type=button id=fakeFileButton>Select</button>
+					</span>
+				</div>
+			</div>
+		</div>
+  `;
+	
+	qs('input + input + input#fileInput + div.row + div.g').outerHTML = `
+		<div class=row>
+			<div class="col-xs-12 col-md-7 form-group">
+				<label for=fakeFileInput>파일 이름</label>
+				<input id=documentInput class=form-control name=document type=text />
+			</div>
+		</div>
+  `;
+	
+	var lices = [], cates = [];
+	
+	for(cfg_1 in config) {
+		if(typeof config[cfg_1] != 'object') continue;
+		/* _ea2134b3 */
+		for(cfg_2 in config[cfg_1]) {
+			if(typeof config[cfg_1][cfg_2] != 'object') continue;
+			/* _49d9a01a */
+			for(cfg_3 in config[cfg_1][cfg_2]) {
+				if(typeof config[cfg_1][cfg_2][cfg_3] != 'object') continue;
+				/* _98277f5a */
+				for(cfg_4 in config[cfg_1][cfg_2][cfg_3]) {
+					if(typeof config[cfg_1][cfg_2][cfg_3][cfg_4] != 'object') continue;
+					/* CC BY 2.0 */
+					for(cfg_5 in config[cfg_1][cfg_2][cfg_3][cfg_4]) {
+						var str = config[cfg_1][cfg_2][cfg_3][cfg_4][cfg_5];
+						if(typeof str == 'string' && str.startsWith('이미지 라이선스/')) {
+							lices.push({ display: cfg_4, doc: '틀:' + str });
+						}
+						if(typeof str == 'string' && str.startsWith('파일/')) {
+							cates.push({ display: cfg_4, doc: '분류:' + str });
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	var lcopt = '', ctopt = '';
+	for(lice of lices) {
+		lcopt += '<option value="' + lice.doc + '"' + (lice.display == '제한적 이용' ? ' selected' : '') + '>' + lice.display + '</option>';
+	}
+	for(cate of cates) {
+		ctopt += '<option value="' + cate.doc + '">' + cate.display + '</option>';
+	}
+	
+	qs('label[for="licenseSelect"] + div.v-select').remove();
+	var lclbl = qs('label[for="licenseSelect"]');
+	lclbl.innerText += ' : ';
+	lclbl.outerHTML = lclbl.outerHTML + '<select class=form-control id=licenseSelect name=license>' + lcopt + '</select>';
+	
+	qs('label[for="categorySelect"] + div.v-select').remove();
+	var ctlbl = qs('label[for="categorySelect"]');
+	ctlbl.innerText += ' : ';
+	ctlbl.outerHTML = ctlbl.outerHTML + '<select class=form-control id=categorySelect name=category><option value selected>선택</option>' + ctopt + '</select>';
+	
+	qs('textarea[name="text"]').setAttribute('rows', '25');
 }
 
 /*
