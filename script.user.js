@@ -63,6 +63,29 @@ if(location.pathname.startsWith('/Recent') || location.pathname.startsWith('/con
 	}
 }
 
+function qa(q, f) {
+	for(el of document.querySelectorAll(q)) {
+		f(el);
+	}
+}
+
+const qs = (q, e) => (e || document).querySelector(q);
+
+function usrlnk() {
+	qa('div.v-popover', vp => {
+		var ip = qs('a', vp);
+		var mbr = qs('a.u', vp);
+
+		if(mbr || (!ip.innerText.includes(':') && !ip.innerText.includes('.'))) {
+			vp.outerHTML = '<a ' + (mbr && location.pathname.startsWith('/thread/') ? 'style="font-weight: bold;"' : (mbr && !location.pathname.startsWith('/thread/') ? 'style="font-weight: bold;"' : '')) + ' href="/w/사용자:' + encodeURIComponent((mbr || ip).innerText) + '">' + (mbr || ip).innerHTML + '</a>';
+		} else {
+			vp.outerHTML = '<a href="/contribution/ip/' + encodeURIComponent(ip.innerText) + '/document">' + ip.innerHTML + '</a>';
+		}
+	});
+}
+
+if(location.pathname.startsWith('/thread/')) setInterval(usrlnk, 1000); usrlnk();
+
 (function() {
 	/* 참고 사이트
 	 * https://stackoverflow.com/questions/19469881/remove-all-event-listeners-of-specific-type
