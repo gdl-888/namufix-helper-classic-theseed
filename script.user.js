@@ -29,11 +29,99 @@ document.body.insertBefore(ts, document.getElementById('app'));
 
 var style = document.createElement('style');
 style.innerText = `
+.res-wrapper {
+margin-top: 20px;
+margin-bottom: 20px;
+}
+
+.res-wrapper .r-head {
+background: #eee;
+border: 0px solid #068;
+border-style: solid;
+border-color: #068 #068 #068 #068;
+border-radius: 6px 6px 0 0;
+padding: 8px;
+padding-left: 18px;
+padding-right: 18px;
+padding-bottom: 8px;
+padding-top: 8px;
+text-shadow: 1px 1px #000;
+}
+.res-wrapper .r-head.first-author {
+background: #efe;
+}
+.res-wrapper .r-body {
+background: #fafafa;
+border: 0px solid #068;
+border-style: solid;
+border-color: #068 #068 #068 #068;
+border-radius: 0;
+padding: 5px;
+padding-left: 5px;
+padding-right: 5px;
+padding-bottom: 5px;
+padding-top: 5px;
+}
+.res-wrapper .r-body.r-hidden-body {
+background: #333;
+color: #fff
+}
+.more-box {
+border: 1px solid #068;
+border-width: 1px 1px 1px 1px;
+border-style: solid;
+border-color: #068 #068 #068 #068;
+border-radius: 4px;
+padding: 5px;
+padding-left: 5px;
+padding-right: 5px;
+padding-bottom: 5px;
+padding-top: 5px;
+}
+
+.res-wrapper .r-head {
+  padding: 
+	color: #fff !Important;
+	background: linear-gradient(to bottom, rgb(128, 191, 237) 0%, rgb(91, 153, 226) 51%, rgb(57,128,210) 50%, rgb(51,103,189) 100%);
+}
+.res-wrapper .r-head.first-author {
+	color: #fff !Important;
+	background: linear-gradient(to bottom, rgb(81, 116, 168) 0%, rgb(29, 75, 143) 51%, rgb(16,54,122) 50%, rgb(13,53,123) 100%);
+}
+
+.res-wrapper .r-head a {
+  color: #fff !Important;
+}
+.res.res-type-status .r-body {
+  background-image: linear-gradient(to bottom, #f0ad4e, #ec971f);
+}
+
+.r-hidden-body .line {
+  border-top: 1px solid #fff;
+}
+
+.res .r-body {
+	padding: 5px 10px 10px 15px;
+	background-image: linear-gradient(to bottom, #e8e8e8, #cfcfcf);
+	border-radius: 0px;
+	display: block;
+	max-height: 500px;
+  overflow: scroll;
+}
+
+.res .r-body.r-hidden-body {
+	background-image: linear-gradient(to bottom, #444, #000);
+	color: white;
+}
+`;
+if(!document.querySelector('.buma')) document.head.insertBefore(style, document.querySelector('title'));
+var s2 = document.createElement('style');
+s2.innerText = `
 .res-wrapper .res .r-body .wiki-paragraph {
   margin-bottom: 0 !important;
 }
 `;
-document.body.insertBefore(style, document.getElementById('app'));
+document.head.insertBefore(s2, document.querySelector('title'));
 
 var config = JSON.parse(document.querySelector('div#app + script').innerText.replace('window.INITIAL_STATE=', '').replace(/[;]$/, ''));
 
@@ -528,7 +616,11 @@ var si = setInterval(function() {
 					setInterval(function() {
 						discussPoll(topic);
 						discussFetch(topic);
-					}, 1000);
+					}, 3000);
+					
+					setInterval(function() {
+						setVisibleState();
+					}, 100);
 				}
 				$(function() {
 				  _discussPollStart(location.pathname.replace('/thread/', ''));
