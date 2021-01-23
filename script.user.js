@@ -10,13 +10,30 @@
 // @grant       none
 // ==/UserScript==
 
+var wc = document.createElement('link');
+wc.setAttribute('rel', 'stylesheet');
+wc.setAttribute('href', '/css/wiki.css');
+document.body.insertBefore(wc, document.getElementById('app'));
+
+var df = document.createElement('script');
+df.setAttribute('src', '/js/dateformatter.js');
+document.body.insertBefore(df, document.getElementById('app'));
+
 var jq = document.createElement('script');
-jq.setAttribute('src', 'https://theseed.io/js/jquery-2.1.4.min.js');  /* jQuery를 활성화한다. */
+jq.setAttribute('src', '/js/jquery-2.1.4.min.js');  /* jQuery를 활성화한다. */
 document.body.insertBefore(jq, document.getElementById('app'));
 
 var ts = document.createElement('script');
-ts.setAttribute('src', 'https://theseed.io/js/theseed.js');
+ts.setAttribute('src', '/js/theseed.js');
 document.body.insertBefore(ts, document.getElementById('app'));
+
+var style = document.createElement('style');
+style.innerText = `
+.res-wrapper .res .r-body .wiki-paragraph {
+  margin-bottom: 0 !important;
+}
+`;
+document.body.insertBefore(style, document.getElementById('app'));
 
 var config = JSON.parse(document.querySelector('div#app + script').innerText.replace('window.INITIAL_STATE=', '').replace(/[;]$/, ''));
 
@@ -41,7 +58,7 @@ for(table of document.querySelectorAll('table')) {
 						}
 					}
 				}
-			} else table.setAttribute('class', 'table');
+			} else if(!location.pathname.startsWith('/diff/')) table.setAttribute('class', 'table');
 		}
 	}
 }
@@ -205,7 +222,51 @@ if(location.pathname.startsWith('/contribution/')) {
 }
 
 if(location.pathname.startsWith('/thread/')) {
-	setInterval(usrlnk, 1000);
+	/* setInterval(usrlnk, 1000); */
+	var resdiv = '<div id=res-container>';
+	for(cfg_1 in config) {
+		if(typeof config[cfg_1] != 'object') continue;
+		/* _ea2134b3 */
+		for(cfg_2 in config[cfg_1]) {
+			if(typeof config[cfg_1][cfg_2] != 'object') continue;
+			/* _49d9a01a */
+			for(cfg_3 in config[cfg_1][cfg_2]) {
+				if(typeof config[cfg_1][cfg_2][cfg_3] != 'object' || !((config[cfg_1][cfg_2][cfg_3]) instanceof Array)) continue;
+				
+				var resdata = config[cfg_1][cfg_2][cfg_3];
+				if(!resdata.length) continue;
+				var chk = 1;
+				for(item of resdata) {
+					if(typeof item != 'object' || Object.keys(item).length != 2) {
+						chk = 0; break;
+					}
+				}
+				if(!chk) continue;
+				
+				for(i=1; i<=resdata.length; i++) {
+					resdiv += `
+           <div class="res-wrapper res-loading" data-id=${i} data-visible=false data-locked=false>
+             <div class="res res-type-normal">
+               <div class=r-head>
+                 <span class=num>
+									 <a id=${i}>#${i}</a>&nbsp;
+								 </span>
+                 
+               </div>
+
+               <div class=r-body></div>
+             </div>
+           </div>
+          `;
+				}
+			}
+		}
+	}
+	resdiv += '</div>';
+	
+	qs('form.d + h2 + div.c').remove();
+	qs('form.d + h2').outerHTML += resdiv;
+	
 	qs('input#noDisplayHideAuthor').click();
 	qs('input#noDisplayHideAuthor').remove();
 	qs('label[for="noDisplayHideAuthor"]').remove();
@@ -257,6 +318,226 @@ var si = setInterval(function() {
 	if(typeof jQuery != 'undefined') {
 		clearInterval(si);
 		$(function() {
+			if(location.pathname.startsWith('/thread/')) {
+				function isVisible(elmt) {
+					var top = elmt.offsetTop;
+					var left = elmt.offsetLeft;
+					var width = elmt.offsetWidth;
+					var height = elmt.offsetHeight;
+
+					while(elmt.offsetParent) {
+						elmt = elmt.offsetParent;
+						top += elmt.offsetTop;
+						left += elmt.offsetLeft;
+					}
+
+					return (
+						top < (pageYOffset + innerHeight) &&
+						left < (pageXOffset + innerWidth) &&
+						(top + height) > window.pageYOffset &&
+						(left + width) > window.pageXOffset
+					);
+				}
+				
+				var allLoadingRes = 'div#res-container div.res-wrapper.res-loading';
+				var loadingRes = allLoadingRes + '[data-visible="true"]';
+				var loadingRes2 = loadingRes + '[data-locked="false"]';
+
+				function setVisibleState() {
+					$(allLoadingRes).each(function() {
+						var item = $(this);
+						if(isVisible(item[0])) {
+							item.attr('data-visible', 'true');
+						} else {
+							item.attr('data-visible', 'false');
+						}
+					});
+				}
+				
+				document.addEventListener('scroll', setVisibleState);
+				
+				function discussFetch(topic) {
+					$(loadingRes2).each(function() {
+						var lr = $(this);
+						var id = lr.data('id');
+						lr.attr('data-locked', 'true');
+						
+						$.ajax({
+							url: '/thread/' + topic + '/' + id,
+							success: function(d) {
+								let config = JSON.parse($(d).filter('div#app + script').text().replace('window.INITIAL_STATE=', '').replace(/[;]$/, ''));
+								
+								for(cfg_1 in config) {
+									if(typeof config[cfg_1] != 'object') continue;
+									for(cfg_2 in config[cfg_1]) {
+										if(typeof config[cfg_1][cfg_2] != 'object') continue;
+										for(cfg_3 in config[cfg_1][cfg_2]) {
+											if(typeof config[cfg_1][cfg_2][cfg_3] != 'object' || !((config[cfg_1][cfg_2][cfg_3]) instanceof Array)) continue;
+
+											var resdata = config[cfg_1][cfg_2][cfg_3];
+											if(!resdata.length) continue;
+											var chk = 1;
+											for(item of resdata) {
+												if(typeof item != 'object' || Object.keys(item).length != 9) {
+													chk = 0; break;
+												}
+											}
+											if(!chk) continue;
+											
+											var fi = resdata[0][Object.keys(resdata[0])[2]];
+											var fu = resdata[0][Object.keys(resdata[0])[1]];
+											
+											for(item of resdata) {
+												var ret = [];
+												for(p in item) ret.push(item[p]);
+												
+												var usr = '';
+												if(ret[2]) {
+													usr = '<a ' + (ret[7] ? 'style="font-weight: 700;"' : '') + ' href="/contribution/ip/' + ret[2] + '/document">' + ret[2] + '</a>';
+												} else {
+													usr = '<a ' + (ret[7] ? 'style="font-weight: 700;"' : '') + ' href="/w/사용자:' + ret[1] + '">' + ret[1] + '</a>';
+												}
+												
+												var restyp = 'normal';
+												var cntnt  = ret[3];
+												
+												if(ret[6] != 'normal') {
+													restyp = 'status';
+													switch(ret[6]) {
+														case 'status':
+															cntnt = '스레드 상태를 <strong>' + ret[3] + '</strong>로 변경';
+														break; case 'document':
+															cntnt = '스레드를 <strong>' + ret[3] + '</strong> 문서로 이동';
+														break; case 'topic':
+															cntnt = '스레드 주제를 <strong>' + ret[3] + '</strong>로 이동';
+													}
+												}
+												
+												if(ret[5]) {
+													cntnt = ret[5] + '에 의해 숨겨진 글입니다.<div class="text-line-break" style="margin: 25px 0 0 -10px;"><a class=text onclick="$(this).parent().parent().find(\'> .hidden-content\').show(); $(this).parent().css(\'margin\', \'15px 0 15px -10px\'); $(this).hide();" style="display: block; color: white;">[ADMIN] Show hidden content</a><div class=line></div></div><div class=hidden-content style="display: none;">' + (ret[3] || '내용을 불러올 수 없습니다!') + '</div>';
+												}
+												
+												$('div.res-wrapper.res-loading[data-id="' + ret[0] + '"]').replaceWith (
+													$ (`
+															<div class=res-wrapper data-id=${ret[0]}>
+																<div class="res res-type-${restyp}">
+																	<div class="r-head${(fi == ret[2] && fi) || (fu == ret[1] && fu) ? ' first-author' : ''}">
+																		<span class=num>
+																			<a id=${ret[0]}>#${ret[0]}</a>&nbsp;
+																		</span>${usr}
+																		<span class=pull-right>
+																			<time datetime="${(new Date(ret[4] * 1000)).toISOString()}" data-format="Y-m-d H:i:s"></time>
+																		</span>
+																	</div>
+
+																	<div class="r-body${ret[5] ? ' r-hidden-body' : ''}">${cntnt}</div>
+																</div>
+
+																<div class="combo admin-menu">
+																	<a class="btn btn-danger btn-sm" href="/admin/thread/${topic}/${ret[0]}/${ret[5] ? 'show' : 'hide'}">[ADMIN] 숨기기${ret[5] ? ' 해제' : ''}</a>
+																</div>
+															</div>
+													`)
+												);
+											}
+											
+											$('time').each(function() {
+												var time = $(this);
+												formatDate(new Date(time.attr('datetime')), time.data('format'));
+											});
+										}
+									}
+								}
+							}, error: function(e) {
+								history.go(0);
+							}
+						});
+					});
+				}
+				
+				function discussPoll(topic) {
+					$.ajax({
+						type: 'GET',
+						success: function(d) {
+							let config = JSON.parse($(d).filter('div#app + script').text().replace('window.INITIAL_STATE=', '').replace(/[;]$/, ''));
+							
+							for(cfg_1 in config) {
+								if(typeof config[cfg_1] != 'object') continue;
+								for(cfg_2 in config[cfg_1]) {
+									if(typeof config[cfg_1][cfg_2] != 'object') continue;
+									for(cfg_3 in config[cfg_1][cfg_2]) {
+										if(typeof config[cfg_1][cfg_2][cfg_3] != 'object' || !((config[cfg_1][cfg_2][cfg_3]) instanceof Array)) continue;
+
+										var resdata = config[cfg_1][cfg_2][cfg_3];
+										if(!resdata.length) continue;
+										var chk = 1;
+										for(item of resdata) {
+											if(typeof item != 'object' || Object.keys(item).length != 2) {
+												chk = 0; break;
+											}
+										}
+										if(!chk) continue;
+
+										var cnt = resdata.length;
+										if($('div.res-wrapper').length < cnt) {
+											for(i=$('div.res-wrapper').length+1; i<=cnt; i++) {
+												$('div.res-wrapper:last-child').append($(`
+                           <div class="res-wrapper res-loading" data-id=${i} data-visible=false data-locked=false>
+														 <div class="res res-type-normal">
+															 <div class=r-head>
+																 <span class=num>
+																	 <a id=${i}>#${i}</a>&nbsp;
+																 </span>
+
+															 </div>
+
+															 <div class=r-body></div>
+														 </div>
+													 </div>
+												`));
+											}
+											setVisibleState();
+										}
+									}
+								}
+							}
+						}
+					});
+				}
+				
+				function _discussPollStart(topic) {
+					$('form.c[method="post"][action^="/thread/"]').submit(function() {
+						var self = $(this);
+						self.find('button, textarea').attr('readonly', '');
+						
+						$.ajax({
+							type: 'POST',
+							data: self.serialize(),
+							success: function(d) {
+								self.find('button, textarea').removeAttr('readonly');
+								self.find('textarea').val('');
+							}, error: function(e) {
+								self.find('button, textarea').removeAttr('readonly');
+								alert(e.responseJSON.status || '문제가 발생했습니다!');
+							}
+						});
+						
+						return false;
+					});
+					
+					setInterval(function() {
+						discussPoll(topic);
+						discussFetch(topic);
+					}, 1000);
+				}
+				$(function() {
+				  _discussPollStart(location.pathname.replace('/thread/', ''));
+				});
+			  setVisibleState();
+				
+				window._discussPollStart = _discussPollStart;
+			}
+			
 			/* 참고 사이트
 			 * https://stackoverflow.com/questions/19469881/remove-all-event-listeners-of-specific-type
 			 * https://stackoverflow.com/questions/2048720/get-all-attributes-from-a-html-element-with-javascript-jquery
