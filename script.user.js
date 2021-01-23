@@ -502,7 +502,7 @@ var si = setInterval(function() {
 												}
 												
 												if(ret[5]) {
-													cntnt = ret[5] + '에 의해 숨겨진 글입니다.<div class="text-line-break" style="margin: 25px 0 0 -10px;"><a class=text onclick="$(this).parent().parent().find(\'> .hidden-content\').show(); $(this).parent().css(\'margin\', \'15px 0 15px -10px\'); $(this).hide();" style="display: block; color: white;">[ADMIN] Show hidden content</a><div class=line></div></div><div class=hidden-content style="display: none;">' + (ret[3] || '내용을 불러올 수 없습니다!') + '</div>';
+													cntnt = '[' + ret[5] + '에 의해 숨겨진 글입니다.]<div class="text-line-break" style="margin: 25px 0 0 -10px;"><a class=text onclick="$(this).parent().parent().find(\'> .hidden-content\').show(); $(this).parent().css(\'margin\', \'15px 0 15px -10px\'); $(this).hide();" style="display: block; color: white;">[ADMIN] Show hidden content</a><div class=line></div></div><div class=hidden-content style="display: none;">' + (ret[3] || '내용을 불러올 수 없습니다!') + '</div>';
 												}
 												
 												$('div.res-wrapper.res-loading[data-id="' + ret[0] + '"]').replaceWith (
