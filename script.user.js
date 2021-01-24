@@ -531,7 +531,7 @@ var si = setInterval(function() {
 											
 											$('time').each(function() {
 												var time = $(this);
-												formatDate(new Date(time.attr('datetime')), time.data('format'));
+												time.text(formatDate(new Date(time.attr('datetime')), time.data('format')));
 											});
 										}
 									}
