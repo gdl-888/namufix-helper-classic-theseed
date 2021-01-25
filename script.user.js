@@ -10,6 +10,10 @@
 // @grant       none
 // ==/UserScript==
 
+if(location.pathname.startsWith('/thread/')) {
+	document.querySelector('.wiki-article h2').setAttribute('class', 'wiki-heading');
+}
+
 var wc = document.createElement('link');
 wc.setAttribute('rel', 'stylesheet');
 wc.setAttribute('href', '/css/wiki.css');
@@ -520,7 +524,7 @@ var si = setInterval(function() {
 														break; case 'document':
 															cntnt = '스레드를 <strong>' + ret[3] + '</strong> 문서로 이동';
 														break; case 'topic':
-															cntnt = '스레드 주제를 <strong>' + ret[3] + '</strong>로 이동';
+															cntnt = '스레드 주제를 <strong>' + ret[3] + '</strong>로 변경';
 													}
 												}
 												
