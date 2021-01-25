@@ -747,7 +747,7 @@ var si = setInterval(function() {
 					
 					setInterval(function() {
 						discussPoll(topic);
-					}, 3000);
+					}, (document.title.endsWith(' - 나무위키') ? 5500 : 1500));
 					
 					setVisibleState();
 				}
