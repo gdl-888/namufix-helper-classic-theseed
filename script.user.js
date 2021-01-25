@@ -120,6 +120,105 @@ padding-top: 5px;
 }
 `;
 if(!document.querySelector('.buma')) document.head.insertBefore(style, document.querySelector('title'));
+
+(function() {
+	// 리버티 토론 CSS
+	// https://github.com/namuwiki/theseed-skin-liberty/blob/master/LICENSE (라이선스)
+  // https://github.com/namuwiki/theseed-skin-liberty/blob/153cf78f70206643ec42e856aff8280dc21eb2c0/static/css/theseed.css에서 퍼옴
+	// GPL 3.0 라이선스
+	// https://github.com/namuwiki (작성자)
+	
+	var style = document.createElement('style');
+	style.innerText = `
+	.res-wrapper {
+		padding-bottom: 20px !important;
+	}
+
+	.r-head, .r-body {
+		border: 1px solid black !important;
+			border-collapse: collapse !important;
+	}
+
+	.r-head {
+		background: #dbcfcf !important;
+		border-bottom: 0px !important;
+		padding: 5px 10px !important;
+	}
+
+	.r-head.first-author {
+		background: #a89b9b !important;
+	}
+
+	.r-body.r-hidden-body {
+		background: gray !important;
+		color: white !important;
+	}
+
+	.Liberty .content-wrapper .liberty-content {
+		margin-top: -20px !important;
+	}
+
+	.r-body {
+		background: whitesmoke !important;
+		padding: 10px !important;
+			overflow: scroll !important;
+			max-height: 50vh !important;
+	}
+
+	.more-box {
+		border: 1px solid black !important;
+		margin: 30px !important;
+		padding: 10px !important;
+		display: block !important;
+		width: 80px !important;
+		background: whitesmoke !important;
+	}
+
+	.res.res-type-status .r-body {
+		background: darkorange !important;
+	}
+
+	.r-head.first-author {
+			background: #C4D7F5 !important;
+	}
+
+	.r-head, .r-body {
+			border: 1px solid gainsboro !important;
+	}
+
+	.r-body {
+			padding-bottom: 0 !important;
+	}
+	@keyframes loading-head-animation{
+			0% {background-color: #dbcfcf !important;}
+			50% {background-color: hsla(0, 15%, 54%, 1) !important;}
+			100% {background-color: #dbcfcf !important;}
+	}
+
+	@keyframes loading-res-animation {
+			0% {transform: rotate(2deg);}
+			50% {transform: rotate(-2deg);}
+			100% {transform: rotate(2deg);}
+	}
+
+	.res-loading[data-visible="true"] .r-head {
+			animation: loading-head-animation 1s infinite !important;
+	}
+
+	.res-loading .r-body {
+			height: 50px !important;
+	}
+
+	.res-loading[data-visible="true"] .res {
+			animation: loading-res-animation 1s infinite !important;
+	}
+	`;
+	if(document.querySelector('.Liberty')) {
+		document.body.insertBefore(style, document.querySelector('#app'));
+	  document.querySelector('#glres').remove();
+	}
+})();
+
 var s2 = document.createElement('style');
 s2.innerText = `
 .res-wrapper .res .r-body .wiki-paragraph {
@@ -648,7 +747,7 @@ var si = setInterval(function() {
 					
 					setInterval(function() {
 						discussPoll(topic);
-					}, 1000);
+					}, 3000);
 					
 					setVisibleState();
 				}
