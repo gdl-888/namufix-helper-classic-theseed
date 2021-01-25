@@ -28,6 +28,7 @@ ts.setAttribute('src', '/js/theseed.js');
 document.body.insertBefore(ts, document.getElementById('app'));
 
 var style = document.createElement('style');
+style.setAttribute('id', 'glres');
 style.innerText = `
 .res-wrapper {
 margin-top: 20px;
@@ -406,6 +407,20 @@ var si = setInterval(function() {
 	if(typeof jQuery != 'undefined') {
 		clearInterval(si);
 		$(function() {
+			if($('script[src*="google.com/recaptcha/api.js"]').length) {
+				var theseedjs = setInterval(() => {
+					if(window.recaptchaInit) {
+						clearInterval(theseedjs);
+						recaptchaInit('recaptcha', {
+							sitekey: config.config["wiki.recaptcha_public"],
+							size: 'invisible',
+							badge: 'inline',
+							callback: x => ($('form[method="post"] button[type="submit"]').attr("disabled", true), $('form[method="post"]').submit())
+						}, id => $('form[method="post"]').attr('data-recaptcha', id));
+					}
+				}, 100);
+			}
+
 			if(location.pathname.startsWith('/thread/')) {
 				function isVisible(elmt) {
 					var top = elmt.offsetTop;
@@ -445,9 +460,12 @@ var si = setInterval(function() {
 				document.addEventListener('scroll', setVisibleState);
 				
 				function discussFetch(topic) {
-					$(loadingRes2).each(function() {
-						var lr = $(this);
+					setVisibleState();
+					
+					if($(loadingRes2).length) {
+						var lr = $($(loadingRes2)[0]);
 						var id = lr.data('id');
+						if(lr.attr('data-locked') == 'true') return;
 						lr.attr('data-locked', 'true');
 						
 						$.ajax({
@@ -507,7 +525,16 @@ var si = setInterval(function() {
 												}
 												
 												if(ret[5]) {
-													cntnt = '[' + ret[5] + '에 의해 숨겨진 글입니다.]<div class=text-line-break style="margin: 25px 0 0 -10px;"><a class=text onclick="$(this).parent().parent().find(\'> .hidden-content\').show(); $(this).parent().css(\'margin\', \'15px 0 15px -10px\'); $(this).hide();" style="display: block; color: white;">[ADMIN] Show hidden content</a><div class=line></div></div><div class=hidden-content style="display: none;">' + (ret[3] || '내용을 불러올 수 없습니다!') + '</div>';
+													cntnt = '[' + ret[5] + '에 의해 숨겨진 글입니다.]';
+													if(ret[3]) cntnt += '<div class=text-line-break style="margin: 25px 0 0 -10px;"><a class=text onclick="$(this).parent().parent().find(\'> .hidden-content\').show(); $(this).parent().css(\'margin\', \'15px 0 15px -10px\'); $(this).hide();" style="display: block; color: white;">[ADMIN] Show hidden content</a><div class=line></div></div><div class=hidden-content style="display: none;">' + (ret[3] || '내용을 불러올 수 없습니다!') + '</div>';
+												}
+												
+												hidebtn = '';
+												
+												if(ret[5] && ret[3] !== null) {
+													hidebtn = `<div class="combo admin-menu">
+																	<a class="btn btn-danger btn-sm" href="/admin/thread/${topic}/${ret[0]}/${ret[5] ? 'show' : 'hide'}">[ADMIN] 숨기기${ret[5] ? ' 해제' : ''}</a>
+																</div>`;
 												}
 												
 												$('div.res-wrapper.res-loading[data-id="' + ret[0] + '"]').replaceWith (
@@ -526,9 +553,7 @@ var si = setInterval(function() {
 																	<div class="r-body${ret[5] ? ' r-hidden-body' : ''}">${cntnt}</div>
 																</div>
 
-																<div class="combo admin-menu">
-																	<a class="btn btn-danger btn-sm" href="/admin/thread/${topic}/${ret[0]}/${ret[5] ? 'show' : 'hide'}">[ADMIN] 숨기기${ret[5] ? ' 해제' : ''}</a>
-																</div>
+																${hidebtn}
 															</div>
 													`)
 												);
@@ -545,7 +570,7 @@ var si = setInterval(function() {
 								history.go(0);
 							}
 						});
-					});
+					}
 				}
 				
 				function discussPoll(topic) {
@@ -596,6 +621,7 @@ var si = setInterval(function() {
 							}
 						}
 					});
+					discussFetch(topic);
 				}
 				
 				function _discussPollStart(topic) {
@@ -620,12 +646,9 @@ var si = setInterval(function() {
 					
 					setInterval(function() {
 						discussPoll(topic);
-						discussFetch(topic);
-					}, 3000);
+					}, 1000);
 					
-					setInterval(function() {
-						setVisibleState();
-					}, 100);
+					setVisibleState();
 				}
 				
 				$(function() {
@@ -684,9 +707,12 @@ var si = setInterval(function() {
 
 				$(btn).attr('class', btns[btn]);
 			}
-
-			$('.wiki-folding dt').click(function() {
-				$(this).parent().children('dd').toggle('fast');
+			
+			$('.wiki-folding dt').each(function() {
+				this.outerHTML = this.outerHTML;
+				$(this).click(function() {
+					$(this).parent().children('dd').toggle('fast');
+				});
 			});
 
 			$(".wiki-heading").click(function() {
