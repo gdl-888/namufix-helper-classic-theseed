@@ -601,25 +601,23 @@ var si = setInterval(function() {
 										if(!chk) continue;
 
 										var cnt = resdata.length;
-										if($('div.res-wrapper').length < cnt) {
-											for(i=$('div.res-wrapper').length+1; i<=cnt; i++) {
-												$('div.res-wrapper:last-child').append($(`
-                           <div class="res-wrapper res-loading" data-id=${i} data-visible=false data-locked=false>
-														 <div class="res res-type-normal">
-															 <div class=r-head>
-																 <span class=num>
-																	 <a id=${i}>#${i}</a>&nbsp;
-																 </span>
+										for(i=$('div.res-wrapper').length+1; i<=cnt; i++) {
+											$(`
+												<div class="res-wrapper res-loading" data-id=${i} data-visible=false data-locked=false>
+												<div class="res res-type-normal">
+												<div class=r-head>
+												<span class=num>
+												<a id=${i}>#${i}</a>&nbsp;
+												</span>
 
-															 </div>
+												</div>
 
-															 <div class=r-body></div>
-														 </div>
-													 </div>
-												`));
-											}
-											setVisibleState();
+												<div class=r-body></div>
+												</div>
+												</div>
+											`).appendTo(document.querySelector('#res-container'));
 										}
+										setVisibleState();
 									}
 								}
 							}
