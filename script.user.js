@@ -10,7 +10,11 @@
 // @grant       none
 // ==/UserScript==
 
-if(location.pathname.startsWith('/thread/')) {
+if(location.pathname.startsWith('/history/')) {
+	try { document.querySelector('.wiki-article ul').setAttribute('class', 'wiki-list') } catch(e) { }
+}
+
+if(location.pathname.startsWith('/thread/') && document.title.includes(' (토론) - ')) {
 	document.querySelector('.wiki-article h2').setAttribute('class', 'wiki-heading');
 }
 
@@ -227,7 +231,7 @@ s2.innerText = `
 `;
 document.head.insertBefore(s2, document.querySelector('title'));
 
-var config = JSON.parse(document.querySelector('div#app + script').innerText.replace('window.INITIAL_STATE=', '').replace(/[;]$/, ''));
+window.config = JSON.parse(document.querySelector('div#app + script').innerText.replace('window.INITIAL_STATE=', '').replace(/[;]$/, ''));
 
 var _title = document.querySelector('h1.title, .title h1');
 var _content = document.querySelector('.wiki-article');
@@ -282,7 +286,7 @@ function qa(q, f) {
 	}
 }
 
-const qs = (q, e) => (e || document).querySelector(q);
+window.qs = (q, e) => (e || document).querySelector(q);
 
 function usrlnk() {
 	qa('div.v-popover', vp => {
@@ -299,6 +303,16 @@ function usrlnk() {
 		}
 	});
 }
+
+try {
+	var nt = document.createElement('h1');
+	nt.setAttribute('class', 'title');
+	nt.innerHTML = '<a id=tsoftitlefornf12345678>' + '</a>';
+	nt.style.display = 'none';
+	var doc = config.page.data.document;
+	nt.querySelector('a#tsoftitlefornf12345678').innerText = doc.namespace + ':' + doc.title;
+	qs('.wiki-article').appendChild(nt);
+} catch(e) { }
 
 function req(pth) {
 	var request = new XMLHttpRequest();
@@ -413,7 +427,7 @@ if(location.pathname.startsWith('/contribution/')) {
 	});
 }
 
-if(location.pathname.startsWith('/thread/')) {
+if(location.pathname.startsWith('/thread/') && document.title.includes(' (토론) - ')) {
 	/* setInterval(usrlnk, 1000); */
 	var resdiv = '<div id=res-container>';
 	for(cfg_1 in config) {
@@ -524,7 +538,7 @@ var si = setInterval(function() {
 				}, 100);
 			}
 
-			if(location.pathname.startsWith('/thread/')) {
+			if(location.pathname.startsWith('/thread/') && document.title.includes(' (토론) - ')) {
 				function isVisible(elmt) {
 					var top = elmt.offsetTop;
 					var left = elmt.offsetLeft;
